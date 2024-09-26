@@ -1,0 +1,27 @@
+import requests
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import time
+BACKEND_URL = 'http://localhost:5000/api/message'
+FRONTEND_URL = 'http://localhost:3000'
+def fetch_backend_message():
+    response = requests.get(BACKEND_URL)
+    if response.status_code == 200:
+        return response.json().get('message')
+    else:
+        raise Exception("Failed to fetch message from backend")
+def verify_frontend_message(expected_message):
+    driver = webdriver.Chrome()
+    driver.get(FRONTEND_URL)
+    time.sleep(5)
+    message_element = driver.find_element(By.ID, 'message')
+    displayed_message = message_element.text
+    assert displayed_message == expected_message, f"Expected message: '{expected_message}', but got: '{displayed_message}'"
+    print("Frontend message verification passed.")
+    driver.quit()
+if __name__ == "__main__":
+    try:
+        expected_message = fetch_backend_message()
+        verify_frontend_message(expected_message)
+    except Exception as e:
+        print(f"Test failed: {e}")
